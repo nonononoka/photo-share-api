@@ -4,12 +4,11 @@ import expressPlayground from "graphql-playground-middleware-express";
 import { connectMongoDb } from "./mongodb.js";
 import { readFileSync } from "fs";
 import { resolvers } from "./resolvers/index.js";
-const typeDefs = readFileSync(`./typeDefs.graphql`, `UTF-8`);
+const typeDefs = readFileSync(`./typeDefs.graphql`, `UTF-8`).toString();
 
 async function start() {
   // setup mongodb
   const db = await connectMongoDb();
-  const context = { db };
 
   // setup express server
   const app = express();
@@ -25,7 +24,17 @@ async function start() {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context,
+    context: async ({ req }) => {
+      const githubToken = req.headers["authorization"];
+      if (githubToken) {
+        const currentUser = await db
+          .collection("users")
+          .findOne({ githubToken });
+        return { db, currentUser };
+      } else {
+        return { db, currentUser: null };
+      }
+    },
   });
   await server.start();
   server.applyMiddleware({ app });

@@ -1,28 +1,45 @@
-import { GraphQLScalarType } from 'graphql'
+import { GraphQLScalarType } from "graphql";
 
 export const Type = {
   Photo: {
+    id: (parent) => parent.id || parent._id,
     url: (parent) => `http://yoursite.com/img/${parent.id}.jpg`,
-    postedBy: (parent) => {
-      return users.find((u) => u.githubLogin == parent.githubUser);
+    postedBy: async (parent, _, { db }) => {
+      return db.collection("users").findOne({ githubLogin: parent.githubUser });
     },
-    taggedUsers: (parent) =>
-      tags
-        .filter((tag) => tag.photoID === parent.id)
-        .map((tag) => tag.userID)
-        .map((userID) => users.find((u) => u.githubLogin === userID)),
+    taggedUsers: async (parent, args, { db }) => {
+      const tags = await db
+        .collection("tags")
+        .find({ photoID: parent.id })
+        .toArray();
+      const userIds = tags.map((t) => t.userID);
+      return db
+        .collection("users")
+        .find({ githubLogin: { $in: userIds } })
+        .toArray();
+    },
   },
 
   User: {
-    postedPhotos: (parent) => {
-      return photos.filter((p) => p.githubUser === parent.githubLogin);
+    postedPhotos: (parent, _, { db }) => {
+      return db
+        .collection("photos")
+        .find({ githubUser: parent.githubLogin })
+        .toArray();
     },
-    inPhotos: (parent) =>
-      tags
-        .filter((tag) => tag.userID === parent.id)
-        .map((tag) => tag.photoID)
-        .map((photoID) => photos.find((p) => p.id === photoID)),
+    inPhotos: async (parent, _, { db }) => {
+      const photos = await db
+        .collection("tags")
+        .find({ userID: parent.githubLogin })
+        .toArray();
+      const photoIds = photos.map((p) => p.photoID);
+      return db
+        .collection("photos")
+        .find({ id: { $in: photoIds } })
+        .toArray();
+    },
   },
+
   DateTime: new GraphQLScalarType({
     name: `DateTime`,
     description: `A valid date time value`,

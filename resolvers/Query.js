@@ -1,11 +1,13 @@
-export const Query =  {
-  totalPhotos: (parent, args, { db }) =>
+export const Query = {
+  totalPhotos: (_, __, { db }) =>
     db.collection("photos").estimatedDocumentCount(),
 
-  allPhotos: (parent, args, { db }) => db.collection("photos").find().toArray(),
+  allPhotos: (_, __, { db }) => db.collection("photos").find().toArray(),
 
-  totalUsers: (parent, args, { db }) =>
+  totalUsers: (_, __, { db }) =>
     db.collection("users").estimatedDocumentCount(),
 
-  allUsers: (parent, args, { db }) => db.collection("users").find().toArray(),
+  allUsers: (_, __, { db }) => db.collection("users").find().toArray(),
+
+  me: (_, __, { currentUser }) => currentUser,
 };
