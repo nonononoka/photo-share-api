@@ -4,6 +4,7 @@ import expressPlayground from "graphql-playground-middleware-express";
 import { connectMongoDb } from "./mongodb.js";
 import { readFileSync } from "fs";
 import { resolvers } from "./resolvers/index.js";
+
 const typeDefs = readFileSync(`./typeDefs.graphql`, `UTF-8`).toString();
 
 async function start() {
