@@ -17,7 +17,6 @@ export const Mutation = {
     return users;
   },
   postPhoto: async (_, args, { db, currentUser }) => {
-    console.log(args);
     if (!currentUser) {
       throw new Error("only an authorized user can post a photo");
     }
