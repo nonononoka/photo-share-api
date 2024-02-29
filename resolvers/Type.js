@@ -7,7 +7,6 @@ export const Type = {
       return `http://yoursite.com/img/${parent.id}.jpg`;
     },
     postedBy: async (parent, _, context) => {
-      console.log(context)
       return await context.db
         .collection("users")
         .findOne({ githubLogin: parent.githubUser });

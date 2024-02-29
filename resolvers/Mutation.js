@@ -17,6 +17,7 @@ export const Mutation = {
       githubToken: r.login.sha1,
     }));
     await db.collection("users").insertMany(users);
+    users.forEach((newUser) => pubsub.publish("user-added", { newUser }));
     return users;
   },
   postPhoto: async (_, args, { db, currentUser }) => {

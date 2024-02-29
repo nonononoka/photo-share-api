@@ -44,6 +44,7 @@ type Mutation {
 
 type Subscription {
     newPhoto: Photo!
+    newUser: User!
 }
 
 input PostPhotoInput{

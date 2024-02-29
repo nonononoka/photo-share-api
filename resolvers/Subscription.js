@@ -8,4 +8,9 @@ export const Subscription = {
       return pubsub.asyncIterator("photo-added");
     },
   },
+  newUser: {
+    subscribe: () => {
+        return pubsub.asyncIterator("user-added");
+      },
+  }
 };
