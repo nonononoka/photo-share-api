@@ -8,7 +8,10 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 import { createServer } from "http";
-import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginDrainHttpServer } from "apollo-server-core";
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginDrainHttpServer,
+} from "apollo-server-core";
 
 const typeDefs = readFileSync(`./typeDefs.graphql`, `UTF-8`).toString();
 
@@ -34,14 +37,24 @@ async function start() {
     path: "/graphql",
   });
   // Save the returned server's info so we can shutdown this server later
-  const serverCleanup = useServer({ schema }, wsServer);
+  const serverCleanup = useServer(
+    {
+      schema,
+      context: async (_, __, ___) => {
+        return { db };
+      },
+    },
+    wsServer
+  );
 
   // set up graphql server
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    context: async ({ req }) => {
-      const githubToken = req.headers["authorization"];
+    context: async ({ req, connection }) => {
+      const githubToken = req
+        ? req.headers["authorization"]
+        : connection.context.Authorization;
       if (githubToken) {
         const currentUser = await db
           .collection("users")

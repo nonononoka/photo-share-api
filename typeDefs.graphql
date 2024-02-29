@@ -42,6 +42,10 @@ type Mutation {
     fakeUserAuth(githubLogin: ID!): AuthPayload!
 }
 
+type Subscription {
+    newPhoto: Photo!
+}
+
 input PostPhotoInput{
     name: String!
     category: PhotoCategory=PORTRAIT
@@ -52,9 +56,4 @@ type AuthPayload {
     token: String!
     user:User!
 }
-
-type Subscription {
-    newPhoto: Photo!
-}
-
 

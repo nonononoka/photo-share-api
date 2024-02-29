@@ -1,10 +1,13 @@
 import { authorizeWithGithub } from "../github.js";
+import { pubsub } from "./Subscription.js";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
+// https://apollographql-jp.com/tutorial/resolvers/
+// the format of resolver.
 export const Mutation = {
-  addFakeUsers: async (root, { count }, { db }) => {
+  addFakeUsers: async (_, { count }, { db }) => {
     const randomUserApi = `https://randomuser.me/api/?results=${count}`;
     const { results } = await fetch(randomUserApi).then((res) => res.json());
     const users = results.map((r) => ({
@@ -27,6 +30,7 @@ export const Mutation = {
     };
     const { insertedId } = await db.collection("photos").insertOne(newPhoto);
     newPhoto.id = insertedId;
+    pubsub.publish("photo-added", { newPhoto });
     return newPhoto;
   },
 

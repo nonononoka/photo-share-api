@@ -3,11 +3,16 @@ import { GraphQLScalarType } from "graphql";
 export const Type = {
   Photo: {
     id: (parent) => parent.id || parent._id,
-    url: (parent) => `http://yoursite.com/img/${parent.id}.jpg`,
-    postedBy: async (parent, _, { db }) => {
-      return db.collection("users").findOne({ githubLogin: parent.githubUser });
+    url: (parent) => {
+      return `http://yoursite.com/img/${parent.id}.jpg`;
     },
-    taggedUsers: async (parent, args, { db }) => {
+    postedBy: async (parent, _, context) => {
+      console.log(context)
+      return await context.db
+        .collection("users")
+        .findOne({ githubLogin: parent.githubUser });
+    },
+    taggedUsers: async (parent, _, { db }) => {
       const tags = await db
         .collection("tags")
         .find({ photoID: parent.id })
